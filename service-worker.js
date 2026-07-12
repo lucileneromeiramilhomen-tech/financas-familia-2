@@ -4,7 +4,7 @@
 // vindo do seu Apps Script (Google Sheets), então é necessário internet pra
 // carregar/salvar lançamentos.
 
-const CACHE_NAME = "financas-familia-v2";
+const CACHE_NAME = "financas-familia-v3";
 const APP_SHELL = [
   "./index.html",
   "./manifest.json",
