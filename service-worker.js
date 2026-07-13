@@ -1,10 +1,11 @@
 // Service worker do PWA "Finanças da Família"
-// Faz cache do "shell" do app (HTML/CSS/JS embutidos no arquivo único) para abrir
-// instantaneamente e funcionar mesmo com internet ruim. Os dados em si continuam
-// vindo do seu Apps Script (Google Sheets), então é necessário internet pra
-// carregar/salvar lançamentos.
+// Estratégia: o HTML principal (app shell) sempre busca a versão mais nova
+// da rede primeiro (network-first) e só usa o cache como fallback offline.
+// Isso garante que toda atualização publicada apareça na hora, sem precisar
+// limpar dados do site manualmente. Ícones/manifest usam cache-first (mudam
+// raramente, então não há problema em servir do cache).
 
-const CACHE_NAME = "financas-familia-v5";
+const CACHE_NAME = "financas-familia-v6";
 const APP_SHELL = [
   "./index.html",
   "./manifest.json",
@@ -38,15 +39,34 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Shell do app: cache-first (abre rápido, atualiza em segundo plano)
+  const isAppShellDoc =
+    event.request.mode === "navigate" ||
+    event.request.destination === "document" ||
+    url.pathname.endsWith(".html");
+
+  if (isAppShellDoc) {
+    // NETWORK-FIRST: sempre tenta buscar a versão mais nova publicada.
+    // Só cai pro cache se estiver offline.
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse.ok) {
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse.clone()));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Demais arquivos estáticos (ícones, manifest): cache-first, atualiza em segundo plano
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const fetchPromise = fetch(event.request)
         .then((networkResponse) => {
           if (event.request.method === "GET" && networkResponse.ok) {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse.clone());
-            });
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse.clone()));
           }
           return networkResponse;
         })
