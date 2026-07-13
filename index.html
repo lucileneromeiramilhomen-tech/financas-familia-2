@@ -52,13 +52,26 @@
   .sidebar nav button.active,.sidebar nav button:hover{background:rgba(255,255,255,0.06);color:#fff;}
   .main{flex:1;padding:26px 30px 70px;max-width:1240px;}
   html,body{overflow-x:hidden;}
+  .bottom-nav{display:none;}
   @media (max-width:880px){
     .layout{flex-direction:column;}
-    .sidebar{width:100%;flex-direction:column;align-items:stretch;padding:12px 14px;gap:10px;}
-    .sidebar .brand{justify-content:center;}
-    .sidebar nav{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:6px;}
-    .sidebar nav button{padding:8px 10px;font-size:12px;flex:0 0 auto;}
-    .main{padding:16px 12px 60px;max-width:100%;}
+    .sidebar nav{display:none;}
+    .sidebar{width:100%;padding:14px 18px;flex-direction:row;justify-content:space-between;align-items:center;}
+    .sidebar .brand{justify-content:flex-start;}
+    .main{padding:16px 12px calc(78px + env(safe-area-inset-bottom));max-width:100%;}
+    .bottom-nav{
+      display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;
+      background:var(--sidebar);border-top:1px solid rgba(255,255,255,0.08);
+      padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+    }
+    .bottom-nav button{
+      flex:1;background:transparent;border:none;color:#9EA2C4;
+      display:flex;flex-direction:column;align-items:center;gap:3px;
+      font-size:10px;font-weight:600;padding:4px 2px;border-radius:10px;
+    }
+    .bottom-nav button .bn-icon{font-size:19px;line-height:1;}
+    .bottom-nav button.active{color:#fff;}
+    .bottom-nav button.active .bn-icon{transform:scale(1.08);}
   }
   .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
   .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px;}
@@ -190,6 +203,14 @@
         <span id="current-user-name"></span>
       </div>
     </div>
+
+    <nav class="bottom-nav no-print">
+      <button class="active" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="bn-icon">🏠</span>Painel</button>
+      <button onclick="openLimitsModal()"><span class="bn-icon">🎯</span>Limites</button>
+      <button onclick="openMembersModal()"><span class="bn-icon">👥</span>Membros</button>
+      <button onclick="openSetupFromApp()"><span class="bn-icon">⚙️</span>Ajustes</button>
+      <button onclick="logout()"><span class="bn-icon">⏻</span>Sair</button>
+    </nav>
 
     <div class="main">
       <div class="topbar">
