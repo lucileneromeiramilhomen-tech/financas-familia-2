@@ -59,6 +59,9 @@
     .sidebar{width:100%;padding:14px 18px;flex-direction:row;justify-content:space-between;align-items:center;}
     .sidebar .brand{justify-content:flex-start;}
     .main{padding:16px 12px calc(78px + env(safe-area-inset-bottom));max-width:100%;}
+    .tx-row{padding:12px 14px;}
+    .tx-tag,.tx-status{display:none;}
+    .tx-row .mono{margin-left:auto;flex-shrink:0;}
     .bottom-nav{
       display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;
       background:var(--sidebar);border-top:1px solid rgba(255,255,255,0.08);
@@ -72,6 +75,11 @@
     .bottom-nav button .bn-icon{font-size:19px;line-height:1;}
     .bottom-nav button.active{color:#fff;}
     .bottom-nav button.active .bn-icon{transform:scale(1.08);}
+    .bottom-nav button.bn-add .bn-icon{
+      background:var(--indigo);color:#fff;width:34px;height:34px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:1px;
+    }
+    .bottom-nav button.bn-add{color:#fff;}
   }
   .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
   .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:18px;}
@@ -107,8 +115,8 @@
   .tx-row{display:flex;align-items:center;gap:12px;padding:13px 20px;border-top:1px solid var(--border);}
   .tx-row:first-child{border-top:none;}
   .tx-dot{width:9px;height:9px;border-radius:3px;flex-shrink:0;}
-  .tx-title{font-size:13.5px;font-weight:700;}
-  .tx-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .tx-title{font-size:13.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tx-sub{font-size:11.5px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .tx-tag{background:var(--indigo-light);color:var(--indigo);font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap;}
   .tx-status{background:var(--green-bg);color:var(--green);font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;}
   .limit-row{padding:12px 20px;border-top:1px solid var(--border);}
@@ -121,6 +129,13 @@
   .modal-overlay{position:fixed;inset:0;background:rgba(15,17,30,0.5);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;}
   .modal-card{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;}
   .modal-title{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;}
+  .settings-list{display:flex;flex-direction:column;gap:6px;}
+  .settings-row{display:flex;align-items:center;gap:12px;width:100%;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:11px 12px;text-align:left;}
+  .settings-row-icon{font-size:18px;flex-shrink:0;width:26px;text-align:center;}
+  .settings-row-text{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .settings-row-text b{font-size:13px;color:var(--text);}
+  .settings-row-text small{font-size:11px;color:var(--muted);margin-top:1px;}
+  .settings-row-chevron{color:var(--muted2);font-size:18px;flex-shrink:0;}
   .field-label{font-size:11px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block;}
   .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .color-swatches{display:flex;gap:10px;margin-top:6px;}
@@ -206,9 +221,9 @@
 
     <nav class="bottom-nav no-print">
       <button class="active" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="bn-icon">🏠</span>Painel</button>
-      <button onclick="openLimitsModal()"><span class="bn-icon">🎯</span>Limites</button>
+      <button class="bn-add" onclick="openAddTxModal()"><span class="bn-icon">➕</span>Nova</button>
       <button onclick="openMembersModal()"><span class="bn-icon">👥</span>Membros</button>
-      <button onclick="openSetupFromApp()"><span class="bn-icon">⚙️</span>Ajustes</button>
+      <button onclick="openSettingsHub()"><span class="bn-icon">⚙️</span>Ajustes</button>
       <button onclick="logout()"><span class="bn-icon">⏻</span>Sair</button>
     </nav>
 
@@ -640,6 +655,55 @@ async function saveLimits(){
   }
   closeModal();
   renderApp();
+}
+
+function openSettingsHub(){
+  document.getElementById("modal-root").innerHTML = `
+    <div class="modal-overlay no-print" onclick="if(event.target===this) closeModal()">
+      <div class="modal-card" style="max-width:340px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div class="modal-title">⚙️ Ajustes</div>
+          <button class="btn-icon-ghost" onclick="closeModal()">✕</button>
+        </div>
+        <div class="settings-list">
+          <button class="settings-row" onclick="closeModal();openAddTxModal()">
+            <span class="settings-row-icon">➕</span>
+            <span class="settings-row-text"><b>Nova despesa/receita</b><small>Registrar um lançamento</small></span>
+            <span class="settings-row-chevron">›</span>
+          </button>
+          <button class="settings-row" onclick="closeModal();openNewAccountModal()">
+            <span class="settings-row-icon">🏦</span>
+            <span class="settings-row-text"><b>Contas bancárias</b><small>Adicionar ou remover contas</small></span>
+            <span class="settings-row-chevron">›</span>
+          </button>
+          <button class="settings-row" onclick="closeModal();openLimitsModal()">
+            <span class="settings-row-icon">🎯</span>
+            <span class="settings-row-text"><b>Limites por categoria</b><small>Defina tetos mensais de gasto</small></span>
+            <span class="settings-row-chevron">›</span>
+          </button>
+          <button class="settings-row" onclick="closeModal();openMembersModal()">
+            <span class="settings-row-icon">👥</span>
+            <span class="settings-row-text"><b>Membros da família</b><small>Gerenciar quem lança gastos</small></span>
+            <span class="settings-row-chevron">›</span>
+          </button>
+          <button class="settings-row" onclick="closeModal();openExportMenu()">
+            <span class="settings-row-icon">⬇</span>
+            <span class="settings-row-text"><b>Exportar relatórios</b><small>Excel ou PDF</small></span>
+            <span class="settings-row-chevron">›</span>
+          </button>
+          <button class="settings-row" onclick="closeModal();openSetupFromApp()">
+            <span class="settings-row-icon">🔗</span>
+            <span class="settings-row-text"><b>Conexão com a planilha</b><small>Trocar a URL do Apps Script</small></span>
+            <span class="settings-row-chevron">›</span>
+          </button>
+          <button class="settings-row" onclick="logout()">
+            <span class="settings-row-icon">⏻</span>
+            <span class="settings-row-text"><b>Trocar de perfil</b><small>Sair da conta atual</small></span>
+            <span class="settings-row-chevron">›</span>
+          </button>
+        </div>
+      </div>
+    </div>`;
 }
 
 function openExportMenu(){
